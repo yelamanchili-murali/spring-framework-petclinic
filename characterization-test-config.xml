@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Characterization Test Configuration for Spring Framework Pet Clinic
+
+This configuration provides specialized profiles and settings for running 
+characterization tests that capture current behavior before Spring Boot 3 + Next.js migration.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- Include in main pom.xml under <profiles> section -->
+    
+    <profiles>
+        <!-- Characterization Testing Profile -->
+        <profile>
+            <id>characterization</id>
+            <activation>
+                <property>
+                    <name>test</name>
+                    <value>*CharacterizationTest</value>
+                </property>
+            </activation>
+            
+            <properties>
+                <!-- Test execution configuration -->
+                <maven.test.failure.ignore>true</maven.test.failure.ignore>
+                <spring.profiles.active>test</spring.profiles.active>
+                
+                <!-- Logging configuration for behavior capture -->
+                <logback.configuration.file>src/test/resources/logback-characterization.xml</logback.configuration.file>
+                
+                <!-- Memory settings for comprehensive tests -->
+                <maven.surefire.jvmArgs>-Xmx1024m -XX:MaxPermSize=256m</maven.surefire.jvmArgs>
+                
+                <!-- Parallel execution disabled for characterization -->
+                <maven.surefire.parallel>false</maven.surefire.parallel>
+            </properties>
+            
+            <build>
+                <plugins>
+                    <!-- Surefire configuration for characterization tests -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.2.5</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*CharacterizationTest.java</include>
+                            </includes>
+                            
+                            <!-- System properties for test behavior -->
+                            <systemPropertyVariables>
+                                <spring.profiles.active>test</spring.profiles.active>
+                                <characterization.output.enabled>true</characterization.output.enabled>
+                                <java.awt.headless>true</java.awt.headless>
+                            </systemPropertyVariables>
+                            
+                            <!-- Enhanced reporting -->
+                            <reportFormat>xml</reportFormat>
+                            <useFile>true</useFile>
+                            <printSummary>true</printSummary>
+                            
+                            <!-- Console output for behavior documentation -->
+                            <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                            
+                            <!-- JVM arguments -->
+                            <argLine>
+                                ${maven.surefire.jvmArgs}
+                                -Dfile.encoding=UTF-8
+                                -Djava.locale.providers=COMPAT,SPI
+                            </argLine>
+                        </configuration>
+                    </plugin>
+                    
+                    <!-- JaCoCo for code coverage analysis -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.11</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>characterization-report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.reporting.outputDirectory}/jacoco-characterization</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <!-- Include only application code in coverage -->
+                            <includes>
+                                <include>org/springframework/samples/petclinic/**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*Test.java</exclude>
+                                <exclude>**/test/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- CI Profile for Continuous Integration -->
+        <profile>
+            <id>characterization-ci</id>
+            <activation>
+                <property>
+                    <name>ci</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            
+            <properties>
+                <spring.profiles.active>ci</spring.profiles.active>
+                <maven.test.failure.ignore>false</maven.test.failure.ignore>
+                <logback.configuration.file>src/test/resources/logback-ci.xml</logback.configuration.file>
+            </properties>
+            
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- Optimized for CI environment -->
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                            <trimStackTrace>false</trimStackTrace>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- Debug Profile for Troubleshooting -->
+        <profile>
+            <id>characterization-debug</id>
+            <activation>
+                <property>
+                    <name>debug</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            
+            <properties>
+                <spring.profiles.active>debug</spring.profiles.active>
+                <logback.configuration.file>src/test/resources/logback-debug.xml</logback.configuration.file>
+            </properties>
+            
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- Debug configuration -->
+                            <debugForkedProcess>true</debugForkedProcess>
+                            <forkCount>0</forkCount>
+                            <systemPropertyVariables>
+                                <logging.level.org.springframework.samples.petclinic>DEBUG</logging.level.org.springframework.samples.petclinic>
+                                <logging.level.org.springframework.transaction>DEBUG</logging.level.org.springframework.transaction>
+                                <logging.level.org.springframework.orm.hibernate5>DEBUG</logging.level.org.springframework.orm.hibernate5>
+                                <logging.level.org.hibernate.SQL>DEBUG</logging.level.org.hibernate.SQL>
+                                <logging.level.org.hibernate.type.descriptor.sql.BasicBinder>TRACE</logging.level.org.hibernate.type.descriptor.sql.BasicBinder>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
+    <!-- Plugin Management for Consistent Versions -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.11</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+    
+</project>

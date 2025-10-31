@@ -21,8 +21,24 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 /**
- * Simple JavaBean domain object with an id property. Used as a base class for objects needing this property.
- *
+ * Abstract base class providing primary key identity for all persistent domain objects.
+ * Implements common identity patterns used throughout the petclinic domain model.
+ * 
+ * <p>Key responsibilities:
+ * - Provide auto-generated integer primary keys using database identity columns
+ * - Implement new entity detection for persistence lifecycle management
+ * - Serve as foundation for JPA entity hierarchy
+ * 
+ * <p>Design patterns:
+ * - Uses @MappedSuperclass to share identity behavior without separate table
+ * - IDENTITY generation strategy delegates key assignment to database
+ * - Boxed Integer allows null values to distinguish new vs persistent entities
+ * 
+ * <p>Usage guidelines:
+ * - All domain entities should extend this class for consistent identity handling
+ * - isNew() method critical for JPA merge/persist operation decisions
+ * - ID should never be manually set except in special data import scenarios
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
@@ -40,6 +56,12 @@ public class BaseEntity {
         this.id = id;
     }
 
+    /**
+     * Determines if this entity is new (not yet persisted to database).
+     * Critical for JPA persistence operations and form processing logic.
+     * 
+     * @return true if entity has no assigned ID (transient state), false if persistent
+     */
     public boolean isNew() {
         return this.id == null;
     }

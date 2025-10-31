@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Logback configuration for debug characterization tests
+Comprehensive logging for troubleshooting and detailed behavior analysis
+-->
+<configuration>
+    
+    <!-- Console appender with detailed formatting -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Detailed file appender for debug analysis -->
+    <appender name="DEBUG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>target/characterization-reports/debug-behavior.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n%ex</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Application loggers - debug level -->
+    <logger name="org.springframework.samples.petclinic" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG_FILE"/>
+    </logger>
+    
+    <!-- Spring Framework - detailed logging -->
+    <logger name="org.springframework.context" level="DEBUG"/>
+    <logger name="org.springframework.beans" level="DEBUG"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
+    <logger name="org.springframework.test" level="DEBUG"/>
+    
+    <!-- Transaction and data access debugging -->
+    <logger name="org.springframework.transaction" level="DEBUG"/>
+    <logger name="org.springframework.orm" level="DEBUG"/>
+    <logger name="org.springframework.dao" level="DEBUG"/>
+    
+    <!-- Hibernate detailed logging -->
+    <logger name="org.hibernate" level="DEBUG"/>
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+    <logger name="org.hibernate.engine.transaction" level="DEBUG"/>
+    <logger name="org.hibernate.resource.transaction" level="DEBUG"/>
+    
+    <!-- Cache debugging -->
+    <logger name="org.springframework.cache" level="DEBUG"/>
+    
+    <!-- Validation debugging -->
+    <logger name="org.springframework.validation" level="DEBUG"/>
+    <logger name="org.hibernate.validator" level="DEBUG"/>
+    
+    <!-- H2 database debugging -->
+    <logger name="com.h2database" level="DEBUG"/>
+    
+    <!-- Test framework debugging -->
+    <logger name="org.junit" level="DEBUG"/>
+    <logger name="org.mockito" level="DEBUG"/>
+    <logger name="org.springframework.test.context" level="DEBUG"/>
+    
+    <!-- Root logger -->
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG_FILE"/>
+    </root>
+    
+</configuration>

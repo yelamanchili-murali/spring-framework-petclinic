@@ -34,8 +34,25 @@ import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
 
 /**
- * Simple JavaBean domain object representing an owner.
- *
+ * Domain object representing a pet owner in the veterinary clinic system.
+ * Extends Person with contact information and maintains a collection of owned pets.
+ * 
+ * <p>Key responsibilities:
+ * - Store owner contact details (address, city, telephone)
+ * - Manage bidirectional relationship with Pet entities
+ * - Provide sorted, read-only access to owned pets
+ * - Support pet lookup by name with case-insensitive matching
+ * 
+ * <p>Business invariants:
+ * - All contact fields (address, city, telephone) are required
+ * - Telephone must be numeric with max 10 digits
+ * - Pet names must be unique within an owner's collection
+ * - Cascading deletes: removing owner removes all associated pets
+ * 
+ * <p>Performance considerations:
+ * - Lazy loading of pets collection to avoid N+1 queries
+ * - Pet lookup methods iterate collection (consider indexing for large datasets)
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -96,12 +113,25 @@ public class Owner extends Person {
         this.pets = pets;
     }
 
+    /**
+     * Returns an immutable list of this owner's pets, sorted alphabetically by name.
+     * 
+     * @return sorted, unmodifiable list of pets (never null, may be empty)
+     * TODO: Consider caching sorted list if called frequently during request processing
+     */
     public List<Pet> getPets() {
         List<Pet> sortedPets = new ArrayList<>(getPetsInternal());
         PropertyComparator.sort(sortedPets, new MutableSortDefinition("name", true, true));
         return Collections.unmodifiableList(sortedPets);
     }
 
+    /**
+     * Adds a pet to this owner's collection, establishing bidirectional relationship.
+     * 
+     * @param pet the pet to add (must not be null)
+     * TODO: Add validation to prevent duplicate pet names within same owner
+     * TODO: Consider checking if pet already has different owner (business rule validation)
+     */
     public void addPet(Pet pet) {
         getPetsInternal().add(pet);
         pet.setOwner(this);
@@ -119,9 +149,12 @@ public class Owner extends Person {
 
     /**
      * Return the Pet with the given name, or null if none found for this Owner.
+     * Performs case-insensitive name matching.
      *
-     * @param name to test
-     * @return true if pet name is already in use
+     * @param name pet name to search for (case-insensitive)
+     * @param ignoreNew if true, excludes pets without assigned IDs (transient objects)
+     * @return matching pet or null if not found
+     * TODO: Performance risk - O(n) search through pets collection on each call
      */
     public Pet getPet(String name, boolean ignoreNew) {
         name = name.toLowerCase();

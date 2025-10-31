@@ -1,3 +1,28 @@
+<%--
+  Owner Details View - displays comprehensive owner information with pet and visit history
+  
+  Model Attributes Expected:
+  - owner: Owner entity with fully populated pet collection and visit histories
+  
+  Key Features:
+  - Owner contact information display with proper XSS protection via c:out
+  - Action buttons for owner editing and pet registration
+  - Comprehensive pet listing with visit history in tabular format
+  - Accessible markup with proper ARIA attributes and table headers
+  
+  Security Considerations:
+  - All dynamic content escaped via c:out or fn:escapeXml to prevent XSS
+  - URL parameters properly encoded through Spring URL building
+  - No session state required (session="false")
+  
+  Performance Notes:
+  - Pet collection should be eagerly loaded to avoid N+1 queries
+  - Visit histories loaded per pet - consider pagination for extensive histories
+  - Custom date formatting handled through petclinic:localDate tag
+  
+  TODO: Add pagination support for owners with many pets
+  TODO: Consider AJAX loading for visit histories to improve initial page load
+--%>
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -6,8 +31,10 @@
 
 <petclinic:layout pageName="owners">
 
+    <!-- Owner Contact Information Section -->
     <h2 id="ownerInformation">Owner Information</h2>
 
+    <!-- Accessible data table with proper headers and XSS protection -->
     <table class="table table-striped" aria-describedby="ownerInformation">
         <tr>
             <th id="name">Name</th>

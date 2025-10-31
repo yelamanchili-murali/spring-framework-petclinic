@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Logback configuration for CI environment characterization tests
+Minimal output optimized for continuous integration
+-->
+<configuration>
+    
+    <!-- Console appender with minimal formatting for CI -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Application loggers - errors and warnings only -->
+    <logger name="org.springframework.samples.petclinic" level="WARN" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- Spring Framework - errors only -->
+    <logger name="org.springframework" level="ERROR"/>
+    
+    <!-- Database - errors only -->
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="com.h2database" level="ERROR"/>
+    
+    <!-- Test framework - off -->
+    <logger name="org.junit" level="OFF"/>
+    <logger name="org.mockito" level="OFF"/>
+    
+    <!-- Root logger - minimal output -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    
+</configuration>

@@ -26,8 +26,26 @@ import jakarta.validation.constraints.NotEmpty;
 import java.time.LocalDate;
 
 /**
- * Simple JavaBean domain object representing a visit.
- *
+ * Domain object representing a veterinary visit record in the clinic system.
+ * Captures the medical encounter between a pet and veterinary staff.
+ * 
+ * <p>Key responsibilities:
+ * - Record visit date and clinical description/notes
+ * - Maintain relationship to the pet being examined
+ * - Support chronological tracking of pet medical history
+ * - Provide audit trail for veterinary care and billing
+ * 
+ * <p>Business invariants:
+ * - Each visit must be associated with exactly one pet
+ * - Visit description is mandatory for medical record completeness
+ * - Visit date defaults to current date but can be overridden for data entry corrections
+ * - Date format follows ISO pattern (yyyy/MM/dd) for consistency
+ * 
+ * <p>Usage patterns:
+ * - Typically created during pet examination workflow
+ * - Queried for pet medical history reports
+ * - Used in billing and insurance claim processing
+ * 
  * @author Ken Krebs
  */
 @Entity
@@ -57,7 +75,10 @@ public class Visit extends BaseEntity {
 
 
     /**
-     * Creates a new instance of Visit for the current date
+     * Creates a new visit instance with date set to today.
+     * Default constructor used by form binding and JPA entity instantiation.
+     * 
+     * TODO: Consider timezone handling - LocalDate.now() uses system timezone
      */
     public Visit() {
         this.date = LocalDate.now();

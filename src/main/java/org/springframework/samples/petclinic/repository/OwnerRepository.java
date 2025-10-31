@@ -21,9 +21,29 @@ import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Owner;
 
 /**
- * Repository class for <code>Owner</code> domain objects All method names are compliant with Spring Data naming
- * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
- *
+ * Data access interface for Owner entities with Spring Data JPA compatible method signatures.
+ * Provides CRUD operations and specialized query methods for owner management.
+ * 
+ * <p>Query capabilities:
+ * - Owner lookup by ID with exception handling for missing entities
+ * - Last name search with partial matching (prefix-based search)
+ * - Persistence operations supporting both insert and update scenarios
+ * 
+ * <p>Performance considerations:
+ * - findByLastName() may benefit from database index on lastName column
+ * - Consider pagination support for large owner datasets
+ * - Lazy loading of associated pets to avoid N+1 query problems
+ * 
+ * <p>Integration patterns:
+ * - Method names follow Spring Data JPA naming conventions for automatic implementation
+ * - Can be extended with @Query annotations for complex queries
+ * - Exception handling delegates to Spring's DataAccessException hierarchy
+ * 
+ * <p>Data integrity:
+ * - save() method handles both new entity creation and existing entity updates
+ * - Cascading behavior for pet relationships managed at JPA entity level
+ * - Optimistic locking support through JPA version fields if configured
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen

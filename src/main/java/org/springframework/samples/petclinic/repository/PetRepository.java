@@ -22,9 +22,29 @@ import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
 
 /**
- * Repository class for <code>Pet</code> domain objects All method names are compliant with Spring Data naming
- * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
- *
+ * Data access interface for Pet entities and related reference data.
+ * Manages pet persistence operations and provides access to pet type classifications.
+ * 
+ * <p>Core functionality:
+ * - Pet CRUD operations with ID-based lookup
+ * - Pet type reference data access for form dropdowns and classification
+ * - Persistence operations supporting both insert and update use cases
+ * 
+ * <p>Performance considerations:
+ * - Pet types typically small reference dataset suitable for caching
+ * - Pet lookups should include eager/lazy loading strategy for visits and owner
+ * - Consider indexing on owner_id foreign key for pet queries by owner
+ * 
+ * <p>Business rules:
+ * - Pet entities maintain bidirectional relationships with Owner and Visit
+ * - Pet type assignments should be validated against reference data
+ * - Cascade operations handled at JPA entity level for data consistency
+ * 
+ * <p>Integration notes:
+ * - Method signatures compatible with Spring Data JPA for automatic implementation
+ * - Exception handling follows Spring DAO exception hierarchy
+ * - Supports both programmatic and declarative transaction management
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen

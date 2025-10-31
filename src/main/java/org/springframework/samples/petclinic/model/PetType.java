@@ -19,8 +19,27 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 /**
+ * Reference data entity representing different types of pets (Cat, Dog, Hamster, etc.).
+ * Provides classification system for pets to support medical protocols and administrative processes.
+ * 
+ * <p>Key characteristics:
+ * - Simple lookup/reference entity with name-based identification
+ * - Typically pre-populated with standard pet types during system setup
+ * - Used in dropdown selections and pet registration forms
+ * - Referenced by Pet entities for categorization
+ * 
+ * <p>Business usage:
+ * - Enables species-specific medical protocols and treatment plans
+ * - Supports reporting and analytics by pet type
+ * - Facilitates veterinary specialization matching
+ * - Used in insurance and billing categorization
+ * 
+ * <p>Data management:
+ * - Reference data should be managed by administrators
+ * - Changes require careful consideration due to existing pet associations
+ * - Consider soft-delete pattern if types need to be retired
+ * 
  * @author Juergen Hoeller
- *         Can be Cat, Dog, Hamster...
  */
 @Entity
 @Table(name = "types")

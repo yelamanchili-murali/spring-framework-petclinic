@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    - DispatcherServlet application context for PetClinic's web tier.
+  Spring MVC Core Configuration - DispatcherServlet application context for PetClinic web tier
+  
+  Key Configuration Areas:
+  - Component scanning for web controllers and formatters
+  - MVC annotation-driven configuration with custom conversion services
+  - Static resource handling for CSS, JS, images and WebJars
+  - View resolution and internationalization support
+  - Exception handling and error page mapping
+  
+  Security Considerations:
+  - Static resource mappings should be carefully controlled
+  - Exception handling prevents stack trace exposure to users
+  - Message source configuration supports internationalization
+  
+  Performance Optimizations:
+  - Resource caching strategies for static content
+  - WebJars integration for client-side dependency management
+  - Component scanning limited to web package for faster startup
+  
+  Integration Points:
+  - Imports mvc-view-config.xml for view resolver configuration
+  - Coordinates with business-config.xml for service layer beans
+  - Uses datasource-config.xml for persistence layer setup
 -->
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:p="http://www.springframework.org/schema/p"
@@ -16,26 +38,30 @@
 
     <import resource="mvc-view-config.xml"/>
 
-    <!--
-        - POJOs labeled with the @Controller and @Service annotations are auto-detected.
-    -->
+    <!-- Component Scanning: Auto-detect controllers and web components -->
+    <!-- Scoped to web package for performance - service layer components loaded in business-config.xml -->
     <context:component-scan
         base-package="org.springframework.samples.petclinic.web"/>
 
+    <!-- Enable MVC annotations with custom conversion service for form binding -->
+    <!-- Provides automatic JSON/XML marshalling, validation, and type conversion -->
     <mvc:annotation-driven conversion-service="conversionService"/>
 
-    <!--  all resources inside folder src/main/webapp/resources are mapped so they can be refered to inside JSP files
-        (see htmlHeader.jsp for more details) -->
+    <!-- Static Resource Handling: CSS, JS, Images from webapp/resources directory -->
+    <!-- Enables browser caching and efficient resource delivery -->
     <mvc:resources mapping="/resources/**" location="/resources/"/>
 
-    <!-- uses WebJars so Javascript and CSS libs can be declared as Maven dependencies (Bootstrap, Font Awesome...) -->
+    <!-- WebJars Integration: Client-side dependencies managed through Maven -->
+    <!-- Allows Bootstrap, jQuery, etc. to be included as Maven dependencies -->
+    <!-- TODO: Add cache headers for production deployment optimization -->
     <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
 
-
+    <!-- Default View Controller: Maps root URL to welcome page -->
+    <!-- Avoids need for dedicated controller method for simple page display -->
     <mvc:view-controller path="/" view-name="welcome"/>
 
-    <!-- serve static resources (*.html, ...) from src/main/webapp/
-    Required when both servlet-mapping is '/' and static resources need to be served -->
+    <!-- Default Servlet Handler: Serves static content when DispatcherServlet handles all requests -->
+    <!-- Critical when servlet-mapping is '/' - delegates non-Spring requests to container -->
     <mvc:default-servlet-handler/>
 
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">

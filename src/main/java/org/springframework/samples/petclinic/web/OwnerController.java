@@ -31,6 +31,30 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * Spring MVC controller handling all owner-related web requests in the petclinic application.
+ * Implements CRUD operations for pet owners with search capabilities and form validation.
+ * 
+ * <p>Supported operations:
+ * - Owner registration (GET/POST /owners/new)
+ * - Owner search by last name (GET /owners/find, GET /owners)
+ * - Owner profile updates (GET/POST /owners/{id}/edit)
+ * - Owner details display (GET /owners/{id})
+ * 
+ * <p>Security considerations:
+ * - ID binding disabled via @InitBinder to prevent mass assignment attacks
+ * - Path variable validation prevents unauthorized owner access
+ * - Form validation prevents data corruption and XSS attacks
+ * 
+ * <p>Business logic:
+ * - Search supports partial matching and empty queries (returns all)
+ * - Single result searches auto-redirect to owner details
+ * - Multiple results display selection page
+ * - Form processing includes server-side validation with error handling
+ * 
+ * <p>Performance notes:
+ * - Consider pagination for large owner datasets
+ * - Search operations may benefit from database indexing on lastName
+ * 
  * @author Juergen Hoeller
  * @author Ken Krebs
  * @author Arjen Poutsma
@@ -48,11 +72,23 @@ public class OwnerController {
         this.clinicService = clinicService;
     }
 
+    /**
+     * Configures form binding security by disallowing 'id' field binding.
+     * Prevents mass assignment attacks where malicious users could modify entity IDs.
+     * 
+     * @param dataBinder the WebDataBinder to configure
+     */
     @InitBinder
     public void setAllowedFields(WebDataBinder dataBinder) {
         dataBinder.setDisallowedFields("id");
     }
 
+    /**
+     * Displays the owner registration form with an empty Owner object.
+     * 
+     * @param model Spring MVC model for template rendering
+     * @return view name for owner creation/update form template
+     */
     @GetMapping(value = "/owners/new")
     public String initCreationForm(Map<String, Object> model) {
         Owner owner = new Owner();
@@ -60,6 +96,14 @@ public class OwnerController {
         return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
     }
 
+    /**
+     * Processes owner registration form submission with validation.
+     * 
+     * @param owner form-bound owner object with validation annotations applied
+     * @param result binding and validation results
+     * @return redirect to owner details on success, form view on validation errors
+     * TODO: Add duplicate owner detection (same name/address combination)
+     */
     @PostMapping(value = "/owners/new")
     public String processCreationForm(@Valid Owner owner, BindingResult result) {
         if (result.hasErrors()) {
@@ -76,6 +120,17 @@ public class OwnerController {
         return "owners/findOwners";
     }
 
+    /**
+     * Processes owner search requests with intelligent result handling.
+     * Supports both targeted searches and "show all" functionality.
+     * 
+     * @param owner search criteria (typically just lastName)
+     * @param result validation and error handling
+     * @param model Spring MVC model for template rendering
+     * @return appropriate view based on search results
+     * TODO: Add pagination for large result sets to improve performance
+     * TODO: Consider search result caching for frequently accessed data
+     */
     @GetMapping(value = "/owners")
     public String processFindForm(Owner owner, BindingResult result, Map<String, Object> model) {
 
@@ -91,11 +146,11 @@ public class OwnerController {
             result.rejectValue("lastName", "notFound", "not found");
             return "owners/findOwners";
         } else if (results.size() == 1) {
-            // 1 owner found
+            // 1 owner found - auto-redirect for user convenience
             owner = results.iterator().next();
             return "redirect:/owners/" + owner.getId();
         } else {
-            // multiple owners found
+            // multiple owners found - show selection page
             model.put("selections", results);
             return "owners/ownersList";
         }

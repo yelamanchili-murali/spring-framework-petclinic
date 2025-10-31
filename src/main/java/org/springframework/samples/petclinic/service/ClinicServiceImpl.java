@@ -32,9 +32,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Mostly used as a facade for all Petclinic controllers
- * Also a placeholder for @Transactional and @Cacheable annotations
- *
+ * Default implementation of ClinicService providing transactional business logic.
+ * Coordinates between web controllers and data access repositories with proper transaction management.
+ * 
+ * <p>Key features:
+ * - Transactional boundaries for data consistency and performance optimization
+ * - Caching support for frequently accessed reference data (veterinarians)
+ * - Repository coordination with dependency injection
+ * - Read-only transaction optimization for query operations
+ * 
+ * <p>Transaction strategy:
+ * - Read operations marked readOnly=true for database optimization
+ * - Write operations use full transaction semantics with rollback capability
+ * - Service layer provides transaction boundaries rather than individual repositories
+ * 
+ * <p>Caching strategy:
+ * - Veterinarian data cached due to relative stability and frequent access
+ * - Consider adding cache eviction strategies for data modification scenarios
+ * 
+ * <p>Performance considerations:
+ * - Repository calls optimized through appropriate transaction boundaries
+ * - Lazy loading relationships handled at service layer
+ * - Consider batch operations for bulk data scenarios
+ * 
  * @author Michael Isvy
  */
 @Service
@@ -104,6 +124,11 @@ public class ClinicServiceImpl implements ClinicService {
         return vetRepository.findAll();
     }
 
+	/**
+	 * Retrieves visit history for a specific pet.
+	 * TODO: Add @Transactional(readOnly = true) for consistency with other read operations
+	 * TODO: Consider adding pagination support for pets with extensive visit histories
+	 */
 	@Override
 	public Collection<Visit> findVisitsByPetId(int petId) {
 		return visitRepository.findByPetId(petId);

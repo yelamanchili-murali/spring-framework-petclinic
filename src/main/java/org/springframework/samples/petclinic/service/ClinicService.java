@@ -25,28 +25,111 @@ import org.springframework.samples.petclinic.model.Visit;
 
 
 /**
- * Mostly used as a facade so all controllers have a single point of entry
- *
+ * Primary business service interface for the petclinic application.
+ * Provides a facade over the data access layer with transactional semantics and business logic.
+ * 
+ * <p>Service responsibilities:
+ * - Coordinate CRUD operations for all domain entities (Owner, Pet, Visit, Vet)
+ * - Enforce business rules and data validation
+ * - Provide transactional boundaries for multi-entity operations
+ * - Abstract data access complexity from web controllers
+ * 
+ * <p>Transaction boundaries:
+ * - All methods should be executed within transaction context
+ * - Read operations typically use read-only transactions for performance
+ * - Write operations ensure data consistency through proper transaction management
+ * 
+ * <p>Business logic patterns:
+ * - Search operations support partial matching and flexible query semantics
+ * - Entity persistence handles both insert and update scenarios transparently
+ * - Reference data (PetTypes, Vets) cached appropriately for performance
+ * 
+ * <p>Performance considerations:
+ * - Search operations may benefit from indexing strategies
+ * - Consider pagination for large datasets
+ * - Lazy loading relationships to avoid N+1 query problems
+ * 
  * @author Michael Isvy
  */
 public interface ClinicService {
 
+    /**
+     * Retrieves all available pet types for classification purposes.
+     * Typically used to populate dropdown selections in pet registration forms.
+     * 
+     * @return collection of all pet types (never null, may be empty)
+     */
     Collection<PetType> findPetTypes();
 
+    /**
+     * Finds an owner by their unique identifier.
+     * 
+     * @param id the owner's unique identifier
+     * @return owner entity with the specified ID
+     * @throws EntityNotFoundException if no owner exists with the given ID
+     */
     Owner findOwnerById(int id);
 
+    /**
+     * Finds a pet by their unique identifier.
+     * 
+     * @param id the pet's unique identifier  
+     * @return pet entity with the specified ID
+     * @throws EntityNotFoundException if no pet exists with the given ID
+     */
     Pet findPetById(int id);
 
+    /**
+     * Persists a pet entity (insert or update based on ID presence).
+     * Manages bidirectional relationships with owner automatically.
+     * 
+     * @param pet the pet to save (must not be null)
+     * TODO: Add validation for required fields and business rules
+     */
     void savePet(Pet pet);
 
+    /**
+     * Persists a visit record to the pet's medical history.
+     * Ensures proper association with the related pet entity.
+     * 
+     * @param visit the visit record to save (must not be null)
+     * TODO: Add validation for visit date and description requirements
+     */
     void saveVisit(Visit visit);
 
+    /**
+     * Retrieves all veterinarians with their specialties.
+     * Used for displaying vet listings and assignment purposes.
+     * 
+     * @return collection of all veterinarians (never null, may be empty)
+     */
     Collection<Vet> findVets();
 
+    /**
+     * Persists an owner entity (insert or update based on ID presence).
+     * Handles cascading operations for associated pets when appropriate.
+     * 
+     * @param owner the owner to save (must not be null)
+     * TODO: Consider duplicate detection (same name/address combinations)
+     */
     void saveOwner(Owner owner);
 
+    /**
+     * Searches for owners by last name using partial matching.
+     * Empty string parameter returns all owners for administrative purposes.
+     * 
+     * @param lastName search criteria (empty string matches all owners)
+     * @return collection of matching owners (never null, may be empty)
+     * TODO: Consider pagination for large result sets
+     */
     Collection<Owner> findOwnerByLastName(String lastName);
 
+    /**
+     * Retrieves all visits for a specific pet, typically for medical history display.
+     * 
+     * @param petId the pet's unique identifier
+     * @return collection of visits for the specified pet (never null, may be empty)
+     */
 	Collection<Visit> findVisitsByPetId(int petId);
 
 }

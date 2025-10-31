@@ -36,8 +36,25 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Simple business object representing a pet.
- *
+ * Domain object representing a pet in the veterinary clinic system.
+ * Central entity linking owners to veterinary visits and pet type classifications.
+ * 
+ * <p>Key responsibilities:
+ * - Store pet identification (name inherited from NamedEntity, birthDate, type)
+ * - Maintain bidirectional relationship with Owner (many pets to one owner)
+ * - Manage collection of veterinary visits with chronological ordering
+ * - Support pet type classification for medical and administrative purposes
+ * 
+ * <p>Business invariants:
+ * - Each pet must belong to exactly one owner
+ * - Pet type is required for medical record categorization
+ * - Birth date uses ISO format (yyyy/MM/dd) for consistent date handling
+ * - Visit collection sorted by date (most recent first) for clinical workflow
+ * 
+ * <p>Performance considerations:
+ * - EAGER fetch on visits may cause performance issues with pets having many visits
+ * - Consider pagination for visit history in high-volume clinics
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -59,7 +76,7 @@ public class Pet extends NamedEntity {
     private Owner owner;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet", fetch = FetchType.EAGER)
-    private Set<Visit> visits;
+    private Set<Visit> visits; // TODO: EAGER fetch may cause N+1 queries - consider LAZY + explicit fetching
 
 
     public void setBirthDate(LocalDate birthDate) {
@@ -97,12 +114,26 @@ public class Pet extends NamedEntity {
         this.visits = visits;
     }
 
+    /**
+     * Returns an immutable list of this pet's visits, sorted chronologically (most recent first).
+     * Useful for displaying visit history in reverse chronological order for clinical review.
+     * 
+     * @return sorted, unmodifiable list of visits (never null, may be empty)
+     * TODO: Consider caching sorted list or using database-level ordering for better performance
+     */
     public List<Visit> getVisits() {
         List<Visit> sortedVisits = new ArrayList<>(getVisitsInternal());
         PropertyComparator.sort(sortedVisits, new MutableSortDefinition("date", false, false));
         return Collections.unmodifiableList(sortedVisits);
     }
 
+    /**
+     * Adds a veterinary visit to this pet's medical history, establishing bidirectional relationship.
+     * 
+     * @param visit the visit record to add (must not be null)
+     * TODO: Add validation for visit date (should not be future dates in most cases)
+     * TODO: Consider business rule validation (duplicate visits on same date, etc.)
+     */
     public void addVisit(Visit visit) {
         getVisitsInternal().add(visit);
         visit.setPet(this);

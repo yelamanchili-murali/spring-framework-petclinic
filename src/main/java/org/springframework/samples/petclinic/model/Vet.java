@@ -33,8 +33,26 @@ import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
 /**
- * Simple JavaBean domain object representing a veterinarian.
- *
+ * Domain object representing a veterinarian in the clinic system.
+ * Extends Person with professional specialties and qualifications.
+ * 
+ * <p>Key responsibilities:
+ * - Store veterinarian personal information (inherited from Person)
+ * - Manage collection of medical specialties and certifications
+ * - Support XML serialization for REST API endpoints
+ * - Provide specialty lookup and counting capabilities
+ * 
+ * <p>Business invariants:
+ * - Veterinarians can have zero or more specialties
+ * - Specialties are managed through many-to-many relationship
+ * - Specialty list is always sorted alphabetically for consistent display
+ * - EAGER fetching ensures specialties available without additional queries
+ * 
+ * <p>Integration considerations:
+ * - XML binding annotations support REST API serialization
+ * - Join table 'vet_specialties' manages specialty associations
+ * - Specialty data typically pre-loaded as reference data
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -60,6 +78,12 @@ public class Vet extends Person {
         this.specialties = specialties;
     }
 
+    /**
+     * Returns an immutable list of this veterinarian's specialties, sorted alphabetically.
+     * Used for display purposes and XML/JSON serialization in REST endpoints.
+     * 
+     * @return sorted, unmodifiable list of specialties (never null, may be empty)
+     */
     @XmlElement
     public List<Specialty> getSpecialties() {
         List<Specialty> sortedSpecs = new ArrayList<>(getSpecialtiesInternal());
@@ -67,10 +91,22 @@ public class Vet extends Person {
         return Collections.unmodifiableList(sortedSpecs);
     }
 
+    /**
+     * Returns the count of specialties for this veterinarian.
+     * Useful for conditional rendering (e.g., "General Practitioner" vs specialty display).
+     * 
+     * @return number of specialties (0 or more)
+     */
     public int getNrOfSpecialties() {
         return getSpecialtiesInternal().size();
     }
 
+    /**
+     * Adds a medical specialty to this veterinarian's qualifications.
+     * 
+     * @param specialty the specialty to add (must not be null)
+     * TODO: Add validation to prevent duplicate specialties for same vet
+     */
     public void addSpecialty(Specialty specialty) {
         getSpecialtiesInternal().add(specialty);
     }

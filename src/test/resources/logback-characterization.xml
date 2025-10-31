@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Logback configuration for characterization tests
+Optimized to capture behavioral output while minimizing noise
+-->
+<configuration>
+    
+    <!-- Console appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- File appender for characterization behavior capture -->
+    <appender name="CHARACTERIZATION_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>target/characterization-reports/behavior-capture.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Application-specific loggers -->
+    <logger name="org.springframework.samples.petclinic" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="CHARACTERIZATION_FILE"/>
+    </logger>
+    
+    <!-- Spring Framework loggers - minimal output -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.context" level="INFO"/>
+    <logger name="org.springframework.test" level="INFO"/>
+    
+    <!-- Transaction logging for characterization -->
+    <logger name="org.springframework.transaction" level="INFO"/>
+    <logger name="org.springframework.orm" level="INFO"/>
+    
+    <!-- Hibernate/JPA loggers - show important operations -->
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="INFO"/>
+    <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="OFF"/>
+    
+    <!-- H2 database - minimal output -->
+    <logger name="com.h2database" level="WARN"/>
+    
+    <!-- Test framework loggers -->
+    <logger name="org.junit" level="WARN"/>
+    <logger name="org.mockito" level="WARN"/>
+    
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    
+</configuration>
