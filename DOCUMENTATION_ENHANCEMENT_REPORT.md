@@ -212,9 +212,9 @@ classDiagram
     VetRepository --> Vet
     VisitRepository --> Visit
     
-    Owner ||--o{ Pet
-    Pet ||--o{ Visit
-    Vet }o--o{ Specialty
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Visit : has
+    Vet "0..*" --> "0..*" Specialty : specializes_in
 ```
 
 ## 4. Behaviour Summary
