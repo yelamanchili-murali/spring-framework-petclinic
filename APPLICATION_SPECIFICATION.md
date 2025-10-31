@@ -72,10 +72,10 @@ classDiagram
     Person <|-- Owner
     Person <|-- Vet
     
-    Owner ||--o{ Pet : owns
-    Pet ||--o{ Visit : has
-    Pet }o--|| PetType : classified_as
-    Vet }o--o{ Specialty : specializes_in
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Visit : has
+    Pet "0..*" --> "1" PetType : classified_as
+    Vet "0..*" --> "0..*" Specialty : specializes_in
 ```
 
 ### Entity Specifications
